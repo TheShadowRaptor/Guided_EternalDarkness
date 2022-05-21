@@ -16,20 +16,30 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float groundDistance = 0.4f;
 
     [Header("MovementValues")]
-    [SerializeField] private float speed = 12f;
     [SerializeField] private float gravity = -9.81f;
     [SerializeField] private float jumpHeight = 3f;
+    [SerializeField] private float speed = 12f;
 
     // ================== private ==================
 
     private Vector3 velocity;
+
+    //Acceleration Varibles
+    private float accelerationSpeed = 3;
+    private float maxAcceleration = 0;
+    private float minAcceleration = 0;
+
+    // ================== public ===================
+    [HideInInspector] public float acceleration;
+    
 
     // =============================================
 
     // Start is called before the first frame update
     void Start()
     {
-
+        maxAcceleration = speed;
+        minAcceleration = speed / 2;
     }
 
     // Update is called once per frame
@@ -38,8 +48,10 @@ public class PlayerMovement : MonoBehaviour
         MovePlayer();
     }
 
+    // =========================== Moveing Methods =====================
     private void MovePlayer()
     {
+
         // Setting up controls
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
@@ -47,13 +59,16 @@ public class PlayerMovement : MonoBehaviour
         Vector3 move = (transform.right * x) + (transform.forward * z);
 
         // Moves Player
-        controller.Move(move * speed * Time.deltaTime);
+        controller.Move(move * acceleration * Time.deltaTime);
 
         // Gravity
         PlayerGravity();
 
         // JumpControls
         PlayerJump();
+
+        // Building Speed
+        ManageAcceleration();
     }
 
     private void PlayerGravity()
@@ -86,4 +101,35 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = Mathf.Sqrt(jumpHeight * -2 * gravity);
         }
     }
+
+    private bool IsMoving()
+    {
+        if (Input.GetAxis("Horizontal") == 1) return true;
+        if (Input.GetAxis("Horizontal") == -1) return true;
+        if (Input.GetAxis("Vertical") == 1) return true;
+        if (Input.GetAxis("Vertical") == -1) return true;
+        return false;
+    }
+
+    private void ManageAcceleration()
+    {
+        if (IsMoving())
+        {
+            acceleration += accelerationSpeed * Time.deltaTime * 2;
+            if (acceleration >= maxAcceleration)
+            {
+                acceleration = maxAcceleration;
+            }
+        }
+        else
+        {
+            acceleration -= accelerationSpeed * Time.deltaTime * 2;
+            if (acceleration <= minAcceleration)
+            {
+                acceleration = minAcceleration;
+            }
+        }
+    }
+
+    // ===============================================================
 }
