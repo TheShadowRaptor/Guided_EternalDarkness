@@ -18,7 +18,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("MovementValues")]
     [SerializeField] private float gravity = -9.81f;
     [SerializeField] private float jumpHeight = 3f;
-    [SerializeField] private float speed = 12f;
+    [SerializeField] private float jogSpeed = 7f;
+    [SerializeField] private float sprintSpeed = 10f;
 
     // ================== private ==================
 
@@ -32,14 +33,13 @@ public class PlayerMovement : MonoBehaviour
     // ================== public ===================
     [HideInInspector] public float acceleration;
     
-
     // =============================================
 
     // Start is called before the first frame update
     void Start()
     {
-        maxAcceleration = speed;
-        minAcceleration = speed / 2;
+        maxAcceleration = jogSpeed;
+        minAcceleration = jogSpeed / 2;
     }
 
     // Update is called once per frame
@@ -69,6 +69,15 @@ public class PlayerMovement : MonoBehaviour
 
         // Building Speed
         ManageAcceleration();
+    }
+
+    private bool IsSprinting()
+    {
+        if (Input.GetButton("Sprint"))
+        {
+            return true;
+        }
+        return false;
     }
 
     private void PlayerGravity()
@@ -113,6 +122,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void ManageAcceleration()
     {
+        if (IsSprinting())
+        {
+            maxAcceleration = sprintSpeed;
+        }
+        else
+        {
+            maxAcceleration = jogSpeed;
+        }
+
         if (IsMoving())
         {
             acceleration += accelerationSpeed * Time.deltaTime * 2;
