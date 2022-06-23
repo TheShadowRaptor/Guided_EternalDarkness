@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 {
+    public CharacterController cController;
 
     [Header("Varibles")]
     public float jumpHeight = 3f;
@@ -19,15 +20,20 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private Transform wallCheck;
     [SerializeField] private float wallDistence;
 
+    [Header("LadderCheck")]
+    [SerializeField] private Transform ladderCheck;
+    [SerializeField] private float ladderDistence;
+    [SerializeField] private LayerMask ladderMask;
+
     [Header("Scripts")]
     [SerializeField] private PlayerLook playerLook;
 
-    public CharacterController cController;
 
     private Vector3 velocity;
     private Vector3 move;
     private float gravity = -9.81f;
     private float _speed;
+    private bool onLadder;
 
     // Start is called before the first frame update
     void Start()
@@ -51,15 +57,19 @@ public class CharacterMovement : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        move = transform.right * x + transform.forward * z;
+        if (IsTouchingLadder()) move = transform.right * x + transform.up * z;
+        else move = transform.right* x +transform.forward * z;
 
         cController.Move(move * _speed * Time.deltaTime);
     }
 
     private void PlayerGravity()
-    {
-        velocity.y += gravity * Time.deltaTime;
-        cController.Move(velocity * Time.deltaTime);
+    {      
+        if (!IsTouchingLadder())
+        {
+            velocity.y += gravity * Time.deltaTime;
+            cController.Move(velocity * Time.deltaTime);
+        }
     }
 
     private bool IsGrounded()
@@ -83,10 +93,9 @@ public class CharacterMovement : MonoBehaviour
             playerLook.wallJump = true;
             velocity.y = Mathf.Sqrt(jumpHeight * -1f * gravity);
         }
-
     }
 
-        private void PlayerSprint()
+    private void PlayerSprint()
     {
         if (Input.GetButton("Sprint") && IsGrounded()) _speed = sprintSpeed;
         else if(IsGrounded()) _speed = speed;
@@ -96,6 +105,13 @@ public class CharacterMovement : MonoBehaviour
     {
         RaycastHit hit;
         if (Physics.Raycast(wallCheck.transform.position, wallCheck.transform.TransformDirection(Vector3.forward), out hit, wallDistence, groundMask)) return true;
+        return false;
+    }
+
+    private bool IsTouchingLadder()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(ladderCheck.transform.position, ladderCheck.transform.TransformDirection(Vector3.forward), out hit, ladderDistence, ladderMask)) return true;
         return false;
     }
 }
