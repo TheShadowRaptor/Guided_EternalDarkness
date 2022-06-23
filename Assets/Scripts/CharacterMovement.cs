@@ -43,7 +43,6 @@ public class CharacterMovement : MonoBehaviour
         PlayerSprint();
         PlayerJump();
         PlayerGrounded();
-        PlayerOnLadder();
     }
 
     private void PlayerMove()
@@ -127,7 +126,7 @@ public class CharacterMovement : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         //Player on ladder
-        if (other.CompareTag("Ladder"))
+        if (other.gameObject.CompareTag("Ladder"))
         {
             PlayerOnLadder();
         }
