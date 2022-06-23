@@ -9,14 +9,23 @@ public class CharacterMovement : MonoBehaviour
     public float jumpHeight = 3f;
     public float speed = 6f;
     public float sprintSpeed = 9f;
+
     [Header("GroundCheck")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundDistence;
     [SerializeField] private LayerMask groundMask;
 
+    [Header("WallCheck")]
+    [SerializeField] private Transform wallCheck;
+    [SerializeField] private float wallDistence;
+
+    [Header("Scripts")]
+    [SerializeField] private PlayerLook playerLook;
+
     public CharacterController cController;
 
     private Vector3 velocity;
+    private Vector3 move;
     private float gravity = -9.81f;
     private float _speed;
 
@@ -42,7 +51,7 @@ public class CharacterMovement : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        Vector3 move = transform.right * x + transform.forward * z;
+        move = transform.right * x + transform.forward * z;
 
         cController.Move(move * _speed * Time.deltaTime);
     }
@@ -50,33 +59,43 @@ public class CharacterMovement : MonoBehaviour
     private void PlayerGravity()
     {
         velocity.y += gravity * Time.deltaTime;
-
         cController.Move(velocity * Time.deltaTime);
     }
 
     private bool IsGrounded()
     {
-        if(Physics.CheckSphere(groundCheck.position, groundDistence, groundMask))
-        {
-            return true;
-        }
+        if(Physics.CheckSphere(groundCheck.position, groundDistence, groundMask)) return true;
         return false;
     }
 
     private void PlayerGrounded()
     {
+        //Stops raising y velocity when on ground
         if(IsGrounded() && velocity.y < 0) velocity.y = -2f;
     }
 
     private void PlayerJump()
     {
         if(Input.GetButtonDown("Jump") && IsGrounded()) velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        // WallJump
+        if (IsTouchingWall() && Input.GetButtonDown("Jump") && !IsGrounded())
+        {
+            playerLook.wallJump = true;
+            velocity.y = Mathf.Sqrt(jumpHeight * -1f * gravity);
+        }
+
     }
 
-    private void PlayerSprint()
+        private void PlayerSprint()
     {
-        //sprint
         if (Input.GetButton("Sprint") && IsGrounded()) _speed = sprintSpeed;
         else if(IsGrounded()) _speed = speed;
+    }
+
+    private bool IsTouchingWall()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(wallCheck.transform.position, wallCheck.transform.TransformDirection(Vector3.forward), out hit, wallDistence, groundMask)) return true;
+        return false;
     }
 }

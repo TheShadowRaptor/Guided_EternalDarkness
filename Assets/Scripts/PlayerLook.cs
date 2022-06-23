@@ -4,10 +4,16 @@ using UnityEngine;
 
 public class PlayerLook : MonoBehaviour
 {
-    [SerializeField] private Transform player;
-
+    [Header("Varibles")]
+    [SerializeField] private float rotationSpeed = 30f;
     public float mouseSensitivity = 100f;
+    public bool wallJump = false;
+
+    [Header("Transforms")]
+    [SerializeField] private Transform player;
+    
     private float xRotation = 0f;
+    private Quaternion rotDest;
 
     // Start is called before the first frame update
     void Start()
@@ -29,5 +35,17 @@ public class PlayerLook : MonoBehaviour
 
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         player.Rotate(Vector3.up * mouseX);
+
+        Turn180();
+    }
+
+    private void Turn180()
+    {
+        if(wallJump)
+        {
+            player.Rotate(Vector3.up, 180);
+            wallJump = false;
+        }
+        
     }
 }
