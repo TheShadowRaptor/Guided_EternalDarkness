@@ -8,12 +8,12 @@ public class PlayerLook : MonoBehaviour
     [SerializeField] private float rotationSpeed = 30f;
     public float mouseSensitivity = 100f;
     public bool wallJump = false;
+    public bool touchingLadder = false;
 
     [Header("Transforms")]
     [SerializeField] private Transform player;
     
     private float xRotation = 0f;
-    private Quaternion rotDest;
 
     // Start is called before the first frame update
     void Start()
@@ -45,7 +45,6 @@ public class PlayerLook : MonoBehaviour
         {
             player.Rotate(Vector3.up, 180);
             wallJump = false;
-        }
-        
+        }       
     }
 }
